@@ -1,0 +1,3 @@
+- cambia palette
+- cambia nome app
+- cambia colori app (casomai giallo e bianco comme apple)
