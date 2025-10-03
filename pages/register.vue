@@ -81,7 +81,7 @@ async function submit() {
       },
     });
 
-    // Mostra un popup di successo usando SweetAlert2 e attende la conferma dell'utente
+    // Mostra un popup di successo  e attende la conferma dell'utente
     // La destrutturazione estrae isConfirmed per verificare se l'utente ha cliccato il bottone
     const { isConfirmed } = await Swal.fire({
       title: "Success!",

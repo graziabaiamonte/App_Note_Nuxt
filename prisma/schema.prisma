@@ -1,34 +1,238 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// SCHEMA PRISMA
+// Questo file definisce la struttura del database dell'applicazione
+// Prisma è un ORM (Object-Relational Mapping) che permette di:
+// 1. Definire la struttura del database in modo dichiarativo
+// 2. Generare un client type-safe per interagire con il database
+// 3. Gestire le migrazioni del database
+// 
+// Documentazione: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// NOTA SULLE PERFORMANCE:
+// Prisma Accelerate è un servizio che offre:
+// - Connection pooling per gestire meglio le connessioni al database
+// - Query caching per velocizzare le query ripetute
+// - Edge functions support per deployment su CDN globali
+// Link: https://pris.ly/cli/accelerate-init
 
+// CONFIGURAZIONE GENERATOR
+// Definisce quale client Prisma generare quando si esegue 'npx prisma generate'
 generator client {
+  // provider specifica quale tipo di client generare
+  // "prisma-client-js" genera un client JavaScript/TypeScript
+  // Questo client sarà usato nel codice per interagire con il database
+  // es: prisma.user.findUnique(), prisma.note.create(), ecc.
   provider = "prisma-client-js"
+  
+  // ALTRE OPZIONI POSSIBILI (non usate qui):
+  // output = "./generated/client" -> cambia dove viene generato il client
+  // previewFeatures = ["fullTextSearch"] -> abilita feature sperimentali
+  // binaryTargets = ["native", "debian-openssl-1.1.x"] -> per deployment multi-piattaforma
 }
 
+// CONFIGURAZIONE DATASOURCE
+// Definisce a quale database connettersi
 datasource db {
+  // provider specifica il tipo di database usato
+  // "mysql" indica che si sta usando MySQL (o MariaDB)
+  // Altri provider supportati: postgresql, sqlite, sqlserver, mongodb, cockroachdb
   provider = "mysql"
+  
+  // url specifica la stringa di connessione al database
+  // env("DATABASE_URL") legge il valore dalla variabile d'ambiente DATABASE_URL
+  // Questo permette di mantenere le credenziali sensibili fuori dal codice
+  // 
+  // Formato tipico della stringa di connessione MySQL:
+  // mysql://username:password@host:port/database_name
+  // Esempio: mysql://root:mypassword@localhost:3306/notenest_db
   url      = env("DATABASE_URL")
+  
+  // ALTRE OPZIONI POSSIBILI (non usate qui):
+  // shadowDatabaseUrl = env("SHADOW_DATABASE_URL") -> database temporaneo per migrazioni
+  // relationMode = "prisma" -> per database che non supportano foreign keys native
 }
 
+// MODEL USER
+// Definisce la tabella 'User' nel database
+// Ogni model Prisma corrisponde a una tabella nel database
 model User {
+  
+  // CAMPO: id
+  // Tipo: Int (numero intero)
+  // @id -> indica che questo campo è la chiave primaria della tabella
+  // @default(autoincrement()) -> il valore viene generato automaticamente dal database
+  //                              incrementando di 1 ad ogni nuovo record
+  // Questo campo identifica univocamente ogni utente
   id        Int      @id @default(autoincrement())
+  
+  // CAMPO: email
+  // Tipo: String (testo)
+  // @unique -> crea un indice univoco: non possono esistere due utenti con la stessa email
+  //            Prisma genererà un errore P2002 se si tenta di inserire un'email duplicata
+  // Questo campo è usato per il login e deve essere unico in tutto il database
   email     String   @unique
+  
+  // CAMPO: password
+  // Tipo: String
+  // Contiene l'hash bcrypt della password, NON la password in chiaro
+  // Esempio di hash bcrypt: "$2a$10$N9qo8uLOickgx2ZMRZoMye..."
+  // L'hash è lungo circa 60 caratteri e include:
+  // - Versione dell'algoritmo
+  // - Cost factor (numero di round di hashing)
+  // - Salt (valore casuale per rendere l'hash unico)
+  // - Hash effettivo della password
   password  String
+  
+  // CAMPO: salt
+  // Tipo: String
+  // Il "salt" è una stringa casuale aggiunta alla password prima dell'hashing
+  // Anche se due utenti hanno la stessa password, il salt diverso genera hash diversi
+  // Questo rende molto più difficili gli attacchi rainbow table
+  // NOTA: bcrypt include già il salt nell'hash, quindi questo campo potrebbe essere ridondante
+  //       In un'implementazione moderna con bcrypt, questo campo non sarebbe necessario
   salt      String
+  
+  // CAMPO: createdAt
+  // Tipo: DateTime (data e ora)
+  // @default(now()) -> imposta automaticamente la data/ora corrente quando viene creato il record
+  // Questo campo registra quando l'utente si è registrato
+  // Formato tipico: 2025-10-03T14:30:00.000Z (ISO 8601)
   createdAt DateTime @default(now())
+  
+  // CAMPO: updatedAt
+  // Tipo: DateTime
+  // @default(now()) -> valore iniziale uguale a createdAt
+  // @updatedAt -> Prisma aggiorna automaticamente questo campo ogni volta che il record viene modificato
+  // Utile per sapere quando l'utente ha fatto l'ultima modifica ai suoi dati
   updatedAt DateTime @default(now()) @updatedAt
+  
+  // RELAZIONE: notes
+  // Tipo: Note[] (array di oggetti Note)
+  // Definisce una relazione uno-a-molti (1:N) con il model Note
+  // Un User può avere molte Note
+  // Questa non è una colonna nel database, ma un campo virtuale che Prisma usa per le query
+  // Permette di fare query come: prisma.user.findUnique({ include: { notes: true } })
+  // per ottenere un utente con tutte le sue note
   notes     Note[]
 }
 
+// MODEL NOTE
+// Definisce la tabella 'Note' nel database
+// Ogni nota appartiene a un singolo utente
 model Note {
+  
+  // CAMPO: id
+  // Tipo: Int
+  // @id @default(autoincrement()) -> chiave primaria con auto-incremento
+  // Identifica univocamente ogni nota
   id        Int      @id @default(autoincrement())
+  
+  // CAMPO: userId
+  // Tipo: Int
+  // Foreign key che punta all'id di un User
+  // Stabilisce a quale utente appartiene questa nota
+  // Questo campo viene usato nella relazione definita sotto
   userId    Int
+  
+  // CAMPO: text
+  // Tipo: String
+  // @db.Text -> specifica che nel database MySQL deve essere usato il tipo TEXT
+  //             invece di VARCHAR (che ha limite di 255/65535 caratteri)
+  //             TEXT può contenere fino a ~65KB di testo
+  //             Per testi molto lunghi esistono anche MEDIUMTEXT (16MB) e LONGTEXT (4GB)
+  // Contiene il contenuto effettivo della nota scritto dall'utente
   text      String   @db.Text
+  
+  // CAMPO: createdAt
+  // Tipo: DateTime
+  // @default(now()) -> imposta automaticamente la data/ora di creazione della nota
+  // Registra quando la nota è stata creata
   createdAt DateTime @default(now())
+  
+  // CAMPO: updatedAt
+  // Tipo: DateTime
+  // @default(now()) @updatedAt -> si aggiorna automaticamente ad ogni modifica
+  // Usato per ordinare le note per "più recenti" nell'interfaccia
+  // Ogni volta che l'utente modifica il testo, questo campo viene aggiornato
   updatedAt DateTime @default(now()) @updatedAt
 
+  // RELAZIONE: user
+  // Tipo: User (oggetto singolo User)
+  // @relation -> definisce una relazione tra Note e User
+  //   fields: [userId] -> specifica quale campo in Note contiene la foreign key
+  //   references: [id] -> specifica a quale campo di User punta la foreign key
+  // 
+  // Questa relazione crea:
+  // 1. Un vincolo di foreign key nel database
+  //    - Non si può creare una nota con userId che non esiste in User
+  //    - Se si elimina un utente, il comportamento dipende da onDelete (non specificato qui)
+  // 2. Un campo virtuale che permette di fare query come:
+  //    prisma.note.findUnique({ include: { user: true } })
+  //    per ottenere una nota con i dati del suo autore
   user User @relation(fields: [userId], references: [id])
+  
+  // OPZIONI AGGIUNTIVE POSSIBILI (non usate qui):
+  // @relation(..., onDelete: Cascade) -> elimina le note se l'utente viene eliminato
+  // @relation(..., onDelete: SetNull) -> imposta userId a null se l'utente viene eliminato
+  // @relation(..., onDelete: Restrict) -> impedisce di eliminare un utente con note
+  // @relation(..., onUpdate: Cascade) -> aggiorna userId se user.id cambia
 }
+
+// COMANDI PRISMA UTILI:
+// 
+// npx prisma generate
+// - Genera il Prisma Client basato su questo schema
+// - Deve essere eseguito ogni volta che si modifica lo schema
+// - Crea i tipi TypeScript per avere autocompletamento e type-safety
+//
+// npx prisma migrate dev --name descrizione_migrazione
+// - Crea una nuova migrazione basata sui cambiamenti dello schema
+// - Applica la migrazione al database di sviluppo
+// - Esempio: npx prisma migrate dev --name add_user_table
+//
+// npx prisma migrate deploy
+// - Applica le migrazioni pendenti in produzione
+// - Usato nei deployment automatici
+//
+// npx prisma db push
+// - Sincronizza lo schema con il database senza creare migrazioni
+// - Utile per prototipazione rapida, non consigliato per produzione
+//
+// npx prisma studio
+// - Apre un'interfaccia grafica nel browser per visualizzare/modificare i dati
+// - Molto utile per debugging e gestione dati durante lo sviluppo
+//
+// npx prisma db seed
+// - Popola il database con dati di test (richiede configurazione separata)
+
+// STRUTTURA DATABASE RISULTANTE:
+//
+// Tabella: User
+// +------------+--------------+------+-----+---------+----------------+
+// | Field      | Type         | Null | Key | Default | Extra          |
+// +------------+--------------+------+-----+---------+----------------+
+// | id         | int          | NO   | PRI | NULL    | auto_increment |
+// | email      | varchar(191) | NO   | UNI | NULL    |                |
+// | password   | varchar(191) | NO   |     | NULL    |                |
+// | salt       | varchar(191) | NO   |     | NULL    |                |
+// | createdAt  | datetime(3)  | NO   |     | CURRENT |                |
+// | updatedAt  | datetime(3)  | NO   |     | CURRENT | on update      |
+// +------------+--------------+------+-----+---------+----------------+
+//
+// Tabella: Note
+// +------------+--------------+------+-----+---------+----------------+
+// | Field      | Type         | Null | Key | Default | Extra          |
+// +------------+--------------+------+-----+---------+----------------+
+// | id         | int          | NO   | PRI | NULL    | auto_increment |
+// | userId     | int          | NO   | MUL | NULL    |                |
+// | text       | text         | NO   |     | NULL    |                |
+// | createdAt  | datetime(3)  | NO   |     | CURRENT |                |
+// | updatedAt  | datetime(3)  | NO   |     | CURRENT | on update      |
+// +------------+--------------+------+-----+---------+----------------+
+//
+// Indici:
+// - User.email: UNIQUE INDEX per ricerche veloci e unicità
+// - Note.userId: FOREIGN KEY INDEX per join veloci con User
+//
+// Relazioni:
+// - User 1:N Note (un utente ha molte note)
+// - Note N:1 User (ogni nota appartiene a un utente)

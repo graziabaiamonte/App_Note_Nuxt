@@ -2,8 +2,7 @@
 // Gestisce la registrazione di nuovi account
 
 // Salt
-// - salt = stringa di caratteri casuali
-// - Tipicamente aggiunto all'inizio della password dell'utente
+// - salt = stringa di caratteri casuali aggiunta all'inizio della password
 //    - "mypassword123" diventa "x#fSA#Amypassword123"
 // - Usato per prevenire che gli hacker usino tabelle hash precompilate per craccare una password
 // - Ogni utente ottiene il proprio salt univoco, quindi anche se due utenti hanno la stessa password le loro password hashate appaiono completamente diverse
@@ -29,35 +28,31 @@ export default defineEventHandler(async (event) => {
     // readBody è una funzione asincrona che estrae i dati JSON inviati dal client
     const body = await readBody(event);
 
-    // Validazione dell'email usando validator.isEmail
+    // Validazione dell'email
     // Verifica che l'email abbia un formato valido (es: user@example.com)
     if (!validator.isEmail(body.email)) {
-      // Se l'email non è valida, lancia un errore con codice HTTP 400 (Bad Request)
       throw createError({
         statusCode: 400,
         message: "Invalid email, please change.",
       });
     }
 
-    // Validazione della password usando validator.isStrongPassword
+    // Validazione della password
     if (
       !validator.isStrongPassword(body.password, {
         // Richiede almeno 8 caratteri
         minLength: 8,
         // Non richiede lettere minuscole (0 = non obbligatorio)
         minLowercase: 0,
-        // Non richiede lettere maiuscole (0 = non obbligatorio)
         minUppercase: 0,
-        // Non richiede numeri (0 = non obbligatorio)
         minNumbers: 0,
-        // Non richiede simboli speciali (0 = non obbligatorio)
+        // Non richiede simboli speciali
         minSymbols: 0,
       })
     ) {
-      // Se la password non è valida (meno di 8 caratteri), lancia un errore 400
       throw createError({
         statusCode: 400,
-        message: "Password is not minimum 8 characters, please change.",
+        message: "Password is not minimum 8 characters.",
       });
     }
 
@@ -83,7 +78,7 @@ export default defineEventHandler(async (event) => {
       },
     });
 
-    // Crea un token JWT (JSON Web Token) per autenticare l'utente
+    // Crea un token JWT  per autenticare l'utente
     // Il token contiene l'id dell'utente e viene firmato con una chiave segreta
     // process.env.JWT_SECRET è la chiave segreta letta dalle variabili d'ambiente
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
@@ -103,7 +98,7 @@ export default defineEventHandler(async (event) => {
     // Verifica se l'errore è di tipo P2002 (errore Prisma per vincolo unique violation)
     // Questo errore si verifica quando si tenta di inserire un'email già esistente
     if (error.code === "P2002") {
-      // Lancia un errore HTTP 409 (Conflict) indicando che l'email è già registrata
+      // Lancia un errore HTTP 409 (Conflict)
       throw createError({
         statusCode: 409,
         message: "An email with this address already exists.",
