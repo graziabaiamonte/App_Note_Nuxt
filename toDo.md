@@ -1,5 +1,0 @@
-- cambia colori app (casomai giallo e bianco comme apple)
-- controlla tutti i commenti ed elimina quelli non necessari
-- cambia nelle impostazioni di table plus la porta non appena lo pubblichi su vercel + cambia user e pw (attualmente sono entrambi in root)
-- copia file env in notion
-- crea un nuovo branch e configuara un database online e non con mamp , in modo da gestire meglio il deploy dell'app (?)

@@ -88,13 +88,3 @@ export default defineNuxtRouteMiddleware(async (event) => {
 // Verifica Cookie: Controlla se esiste il cookie NoteNestJWT che contiene il token di autenticazione
 // Validazione Token: Se il token esiste, lo verifica usando la chiave segreta (JWT_SECRET) tramite il plugin $verifyJwtToken
 // Gestione Errori: Se il token è mancante, scaduto o invalido, reindirizza l'utente a /register
-
-// Perché Solo Server-Side?
-// La verifica lato server è cruciale per la sicurezza perché:
-
-// Il JWT_SECRET non deve mai essere esposto al client
-// Sul browser un utente malintenzioso potrebbe manipolare il codice
-// La verifica server-side garantisce che solo token validi ottengano accesso
-
-// Struttura JWT
-// Ho anche aggiunto una nota sulla struttura del JWT (le tre parti separate da punti) che puoi vedere nel commento finale. Questo spiega il formato del token che hai indicato nel commento originale del codice!

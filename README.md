@@ -1,75 +1,31 @@
-# Nuxt Minimal Starter
+# Nuxt Note App
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Applicazione full-stack sviluppata con Nuxt 3, che integra autenticazione utente, gestione database con Prisma ORM e un'interfaccia moderna e reattiva.
 
-## Setup
+## ✨ Caratteristiche
 
-Make sure to install dependencies:
+- **Full-Stack Application**: Backend e frontend integrati in Nuxt 3
+- **Autenticazione Sicura**: Sistema di login/registrazione con JWT e bcrypt
+- **atabase Management**: ORM Prisma per query type-safe
+- **Validazione Dati**: Validazione robusta di input utente
+- **UI/UX Moderna**: Interfacce responsive con Tailwind CSS
+- **Notifiche**: Alert e popup con SweetAlert2
+- **Utilities Avanzate**: Composables Vue con VueUse
+- **Build Ottimizzate**: Static Site Generation per performance massime
 
-```bash
-# npm
-npm install
+## 🛠️ Tecnologie e Strumenti
 
-# pnpm
-pnpm install
+- **Nuxt**
+- **Vue Router**
+- **Prisma**
+- **jsonwebtoken**
+- **bcryptjs** (hashing sicuro delle password)
+- **validator** (libreria per validazione e sanitizzazione dati)
+- **Tailwind CSS**
+- **SweetAlert2**
+- **Mamp**
+- **TablePlus**
 
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
-```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+![ScreenShot home](/public/readme/note_app_01.png)
+![ScreenShot home 02](/public/readme/note_app_02.png)
+![ScreenShot home 03](/public/readme/note_app_03.png)

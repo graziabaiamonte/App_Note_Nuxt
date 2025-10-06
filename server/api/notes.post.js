@@ -160,16 +160,3 @@ export default defineEventHandler(async (event) => {
 //    - Aggiunge la nuova nota all'array locale notes
 //    - Seleziona automaticamente la nuova nota (vedi index.vue)
 //    - L'utente può iniziare a scrivere immediatamente
-
-// SICUREZZA:
-// - L'endpoint è protetto: solo utenti autenticati possono creare note
-// - Ogni nota è legata all'utente che l'ha creata tramite userId
-// - Non è possibile creare note per altri utenti (userId viene preso dal token JWT)
-// - Il token JWT viene verificato ad ogni richiesta, non solo al login
-// - Gli errori non rivelano dettagli implementativi al client
-
-// RELAZIONE CON ALTRI FILE:
-// - Il token JWT è stato creato in /api/login.post.js durante il login
-// - Il token viene verificato anche dal middleware /middleware/auth.js
-// - La nota creata qui viene poi visualizzata in /pages/index.vue
-// - Le modifiche alla nota vengono salvate tramite /api/notes/[id].patch.js

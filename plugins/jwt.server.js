@@ -46,34 +46,11 @@ export default defineNuxtPlugin((nuxtApp) => {
 // Questo è un pattern speciale di Nuxt che indica che questo plugin
 // deve essere eseguito SOLO lato server e MAI sul client (browser)
 //
-// Perché questo è importante:
-// 1. SICUREZZA: Il JWT_SECRET non deve mai essere esposto al browser
-//    Se questo plugin girasse sul client, il secret potrebbe essere visibile
-//    nel codice JavaScript scaricato dal browser
-//
-// 2. PERFORMANCE: Non ha senso eseguire la verifica JWT sul client
-//    perché il client potrebbe manipolare il codice. La verifica
-//    deve sempre avvenire su un ambiente controllato (il server)
-//
-// 3. DIMENSIONE BUNDLE: La libreria jsonwebtoken non viene inclusa
-//    nel bundle JavaScript che viene scaricato dal browser,
-//    riducendo la dimensione dei file da scaricare
 //
 // Altri suffissi disponibili in Nuxt:
 // - .client.js -> eseguito SOLO sul client/browser
 // - .server.js -> eseguito SOLO sul server
 // - .js -> eseguito sia su client che su server (universale)
-
-// ESEMPIO DI UTILIZZO:
-// In qualsiasi componente Vue o middleware, puoi usare questa funzione così:
-//
-// const { $verifyJwtToken } = useNuxtApp()
-// try {
-//   const decoded = await $verifyJwtToken(token, 'my-secret-key')
-//   console.log(decoded) // { userId: 123, email: 'user@example.com', iat: 1234567890, exp: 1234567890 }
-// } catch (error) {
-//   console.error('Token invalido:', error.message)
-// }
 
 // POSSIBILI ERRORI LANCIATI DA jwt.verify():
 // - JsonWebTokenError: token malformato o signature non valida
@@ -87,13 +64,6 @@ export default defineNuxtPlugin((nuxtApp) => {
 // Provider: Usa provide per rendere la funzione disponibile globalmente con il prefisso $
 // Wrapper: La funzione verifyJwtToken è un wrapper attorno a jwt.verify() della libreria jsonwebtoken
 
-// Nomenclatura .server.js
-// Il suffisso .server.js è fondamentale per tre motivi:
-
-// 🔒 Sicurezza: Impedisce che il JWT_SECRET venga esposto nel browser
-// ⚡ Performance: Riduce la dimensione del bundle JavaScript del client
-// ✅ Logica: La verifica JWT deve avvenire solo lato server, dove l'ambiente è controllato
-
 // Come Funziona jwt.verify()
 // La funzione esegue 4 controlli critici:
 
@@ -101,6 +71,3 @@ export default defineNuxtPlugin((nuxtApp) => {
 // Verifica l'integrità usando la signature
 // Controlla la scadenza (campo exp)
 // Valida eventuali claims aggiuntivi
-
-// Possibili Errori
-// Ho documentato i tre principali errori che possono essere lanciati, tutti da gestire con try-catch come vedi nel middleware!
